@@ -3,7 +3,7 @@ from opcua import Client
 from Classes import Database
 import time
         
-db = Database.Mysql('localhost',3306,'root','Korusu123','dbkepware')
+db = Database.Mysql('host',3306,'user','pass','dbname')
 AllClients =  db.GetAllClients() # veritabanındaki clientları getirir
 
 def TagYaz():

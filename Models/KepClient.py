@@ -6,8 +6,8 @@ from . import SubHandler
 
 class KepClient():
     def __init__(self,clientId):
-        self.db = Database.Mysql('localhost',3306,'root','Korusu123','dbkepware')
-        self.client = Client("opc.tcp://127.0.0.1:49320")
+        self.db = Database.Mysql('host',3306,'user','pass','dbname')
+        self.client = Client("opcurl") # örn: opc.tcp://127.0.0.1:49320
         self._clientId = clientId
         self.nodes = []
         self.handler = SubHandler.SubHandler()
