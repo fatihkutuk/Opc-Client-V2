@@ -3,7 +3,7 @@ from Classes import Database
 
 class SubHandler(object):#Subscribe olunan taglarda değişim olunca tetiklenir
     def __init__(self):
-        self.db = Database.Mysql('localhost',3306,'root','Korusu123','dbkepware') 
+        self.db = Database.Mysql('host',3306,'user','pass','dbname')
         self.text = ""
         self.count = 0
     def datachange_notification(self, node, val, data):
