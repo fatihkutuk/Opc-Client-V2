@@ -6,8 +6,8 @@ from . import SubHandler
 
 class KepClient():
     def __init__(self,clientId):
-        self.db = Database.Mysql('host',3306,'user','pass','dbname')
-        self.client = Client("opcurl") # örn: opc.tcp://127.0.0.1:49320
+        self.db = Database.Mysql('localhost',3306,'root','Korusu123','dbkepware')
+        self.client = Client("opc.tcp://127.0.0.1:49320")
         self._clientId = clientId
         self.nodes = []
         self.handler = SubHandler.SubHandler()
@@ -41,11 +41,10 @@ class KepClient():
             self.handle = self.sub.subscribe_data_change(self.nodes)
         except:
             pass  
-
     def WriteTagsToServer(self):
+        SetNodes = []
+        SetValues = []
         while 1:
-            SetNodes = []
-            SetValues = []
             try:
                 TagsToWhrite = self.db.GetTagsToWhrite(self._clientId)
             except:
@@ -53,24 +52,43 @@ class KepClient():
             for tag in TagsToWhrite:
                 tag = tag.fetchall()
                 for t in tag:
+                
+                    node = self.client.get_node("ns=2;s="+t[1]+"."+t[0]+"."+t[2])
                     try:
-                        node = self.client.get_node("ns=2;s="+t[1]+"."+t[0]+"."+t[2])
-                        SetNodes.append(node)
                         varianttype = node.get_data_type_as_variant_type()
+                        SetNodes.append(node)
                         if varianttype==ua.VariantType.Int16:
-                            dv = ua.DataValue(ua.Variant(int(t[3]), varianttype))
-                        else:    
-                            dv = ua.DataValue(ua.Variant(t[3], varianttype))
-                        SetValues.append(dv)
-                    except Exception as e:
+                            SetValues.append(ua.DataValue(ua.Variant(int(t[3]), varianttype)))
+                        else:
+                            SetValues.append(ua.DataValue(ua.Variant(t[3], varianttype)))
+
+                    except Exception as e :
                         True
-            try:
-                if len(SetValues)>0:
-                    self.clientagYazClient.set_values(SetNodes,SetValues)
-                    SetNodes.clear()
-                    SetValues.clear()   
-            except:
-                False  
+
+            if len(SetValues)>0:
+                try:
+                    self.client.set_values(SetNodes,SetValues)
+
+                except:
+                    True    
+            SetValues.clear()
+            SetNodes.clear()    
+        #         SetNodes.append(node)
+        #         varianttype = node.get_data_type_as_variant_type()
+        #         if varianttype==ua.VariantType.Int16:
+        #             dv = ua.DataValue(ua.Variant(int(t[3]), varianttype))
+        #         else:    
+        #             dv = ua.DataValue(ua.Variant(t[3], varianttype))
+        #         SetValues.append(dv)
+
+        # try:
+        #     if len(SetValues)>0:
+        #         self.client.set_values(SetNodes,SetValues)
+        #         SetNodes.clear()
+        #         SetValues.clear()   
+        # except Exception as e:
+        #     print(e)   
+
              
     def UnsubscribeNodes(self):
         self.sub.unsubscribe(self.handle)
